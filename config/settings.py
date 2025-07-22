@@ -1,6 +1,6 @@
 import os
-from typing import Optional, List
-from pydantic import Field
+from typing import Optional, List, Dict, Any
+from pydantic import Field, AliasChoices
 from pydantic_settings import BaseSettings
 from pathlib import Path
 
@@ -8,7 +8,11 @@ from pathlib import Path
 class ComponentsConfig(BaseSettings):
     """Configuration settings for the Components library."""
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "ignore"  # Allow extra fields from .env
+    }
 
     # API Keys
     openai_api_key: Optional[str] = Field(default=None, env="OPENAI_API_KEY")
@@ -20,10 +24,10 @@ class ComponentsConfig(BaseSettings):
     llm_temperature: float = Field(default=0.3, env="LLM_TEMPERATURE")
 
     # Neo4j Database Settings
-    neo4j_url: str = Field(default="bolt://localhost:7687", env="NEO4J_URL")
-    neo4j_username: str = Field(default="neo4j", env="NEO4J_USERNAME")
-    neo4j_password: str = Field(default="llamaindex", env="NEO4J_PASSWORD")
-    neo4j_database: str = Field(default="neo4j", env="NEO4J_DATABASE")
+    neo4j_url: str = Field(default="bolt://localhost:7687", validation_alias=AliasChoices("NEO4J_URL", "neo4j_url"))
+    neo4j_username: str = Field(default="neo4j", validation_alias=AliasChoices("NEO4J_USERNAME", "neo4j_db_user", "neo4j_username"))
+    neo4j_password: str = Field(default="llamaindex", validation_alias=AliasChoices("NEO4J_PASSWORD", "neo4j_db_password", "neo4j_password"))
+    neo4j_database: str = Field(default="neo4j", validation_alias=AliasChoices("NEO4J_DATABASE", "neo4j_database"))
 
     # Knowledge Graph Settings
     kg_extractors: List[str] = Field(
@@ -54,6 +58,15 @@ class ComponentsConfig(BaseSettings):
     # Agent Settings
     agent_memory_enabled: bool = Field(default=True, env="AGENT_MEMORY_ENABLED")
     allow_parallel_tool_calls: bool = Field(default=False, env="ALLOW_PARALLEL_TOOL_CALLS")
+
+    def get_neo4j_settings(self) -> Dict[str, Any]:
+        """Get Neo4j-specific settings."""
+        return {
+            "url": self.neo4j_url,
+            "username": self.neo4j_username,
+            "password": self.neo4j_password,
+            "database": self.neo4j_database,
+        }
 
 _config: Optional[ComponentsConfig] = None
 

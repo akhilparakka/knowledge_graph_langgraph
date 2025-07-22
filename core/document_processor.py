@@ -2,7 +2,7 @@ from llama_index.core.node_parser import SentenceSplitter
 from config.settings import get_config, ComponentsConfig
 from llama_parse import LlamaParse
 from typing import Optional
-from typing import List, Optional, Union, Dict, Any
+from typing import List, Union, Dict, Any
 from llama_index.core import Document
 from pathlib import Path
 from copy import deepcopy

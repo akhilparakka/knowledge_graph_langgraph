@@ -301,6 +301,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "llama-cloud-services" },
     { name = "llama-index" },
+    { name = "llama-index-graph-stores-neo4j" },
     { name = "nest-asyncio" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -310,6 +311,7 @@ dependencies = [
 requires-dist = [
     { name = "llama-cloud-services", specifier = ">=0.6.50" },
     { name = "llama-index", specifier = ">=0.12.50" },
+    { name = "llama-index-graph-stores-neo4j", specifier = ">=0.4.6" },
     { name = "nest-asyncio", specifier = ">=1.6.0" },
     { name = "pydantic", specifier = ">=2.11.7" },
     { name = "pydantic-settings", specifier = ">=2.10.1" },
@@ -589,6 +591,19 @@ wheels = [
 ]
 
 [[package]]
+name = "llama-index-graph-stores-neo4j"
+version = "0.4.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "llama-index-core" },
+    { name = "neo4j" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/87/7b/242521c3f3f95e4c53ce847a62b3d9f88bbfb9bb2ac99370c58d60084d58/llama_index_graph_stores_neo4j-0.4.6.tar.gz", hash = "sha256:c1398b196bbf5a7aecd6c5eab382c58a025547efe20065b152fea84c519f2c14", size = 15743, upload-time = "2025-01-20T19:46:33.731Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/43/13/881eed340c1fa18b88f6697afc2bba189ba96f325c86239609d23a8796c8/llama_index_graph_stores_neo4j-0.4.6-py3-none-any.whl", hash = "sha256:097a6ab4d77bc9e289c9793bf2fdc042f686234c7b544427fda042439376ce2e", size = 17449, upload-time = "2025-01-20T19:46:32.103Z" },
+]
+
+[[package]]
 name = "llama-index-indices-managed-llama-cloud"
 version = "0.6.11"
 source = { registry = "https://pypi.org/simple" }
@@ -815,6 +830,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a2/6e/371856a3fb9d31ca8dac321cda606860fa4548858c0cc45d9d1d4ca2628b/mypy_extensions-1.1.0.tar.gz", hash = "sha256:52e68efc3284861e772bbcd66823fde5ae21fd2fdb51c62a211403730b916558", size = 6343, upload-time = "2025-04-22T14:54:24.164Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/79/7b/2c79738432f5c924bef5071f933bcc9efd0473bac3b4aa584a6f7c1c8df8/mypy_extensions-1.1.0-py3-none-any.whl", hash = "sha256:1be4cccdb0f2482337c4743e60421de3a356cd97508abadd57d47403e94f5505", size = 4963, upload-time = "2025-04-22T14:54:22.983Z" },
+]
+
+[[package]]
+name = "neo4j"
+version = "5.28.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytz" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4b/20/733dac16f7cedc80b23093415822c9763302519cba0e7c8bcdb5c01fc512/neo4j-5.28.1.tar.gz", hash = "sha256:ae8e37a1d895099062c75bc359b2cce62099baac7be768d0eba7180c1298e214", size = 231094, upload-time = "2025-02-10T08:36:22.566Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6a/57/94225fe5e9dabdc0ff60c88cbfcedf11277f4b34e7ab1373d3e62dbdd207/neo4j-5.28.1-py3-none-any.whl", hash = "sha256:6755ef9e5f4e14b403aef1138fb6315b120631a0075c138b5ddb2a06b87b09fd", size = 312258, upload-time = "2025-02-10T08:36:16.209Z" },
 ]
 
 [[package]]
