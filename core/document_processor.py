@@ -2,11 +2,12 @@ from llama_index.core.node_parser import SentenceSplitter
 from config.settings import get_config, ComponentsConfig
 from llama_parse import LlamaParse
 from typing import Optional
-from typing import List, Union, Dict, Any
+from typing import List, Dict, Any
 from llama_index.core import Document
 from pathlib import Path
 from copy import deepcopy
-
+import tempfile
+import os
 
 class DocumentProcessor:
     def __init__(self, config: Optional[ComponentsConfig] = None):
@@ -33,32 +34,50 @@ class DocumentProcessor:
             )
         return self._llama_parse
 
-    def load_documents_from_file(
+    async def load_documents_from_file(
         self,
-        file_path: Union[str, Path],
+        file_object,
         use_llama_parse: bool = True
     ) -> List[Document]:
         """
-        Load documents from a single file.
+        Load documents from an uploaded file object.
 
         Args:
-            file_path: Path to the file to load
+            file_object: Uploaded file object with read() method
             use_llama_parse: Whether to use LlamaParse for parsing
 
         Returns:
             List of Document objects
         """
-        file_path = Path(file_path)
 
-        if not file_path.exists():
-            raise FileNotFoundError(f"File not found: {file_path}")
+        filename = getattr(file_object, 'filename', 'unknown')
+        file_extension = Path(filename).suffix.lower()
 
-        print(f"Loading document from: {file_path}")
+        if use_llama_parse and file_extension == '.pdf':
+            with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp_file:
+                await file_object.seek(0)
+                content = await file_object.read()
+                if isinstance(content, str):
+                    content = content.encode('utf-8')
+                tmp_file.write(content)
+                tmp_file_path = tmp_file.name
 
-        if use_llama_parse and file_path.suffix.lower() == '.pdf':
-            return self._load_with_llama_parse(file_path)
+            try:
+                result = self._load_with_llama_parse(Path(tmp_file_path))
+                return result
+            finally:
+                os.unlink(tmp_file_path)
         else:
-            return self._load_with_simple_loader(file_path)
+            await file_object.seek(0)
+            content = await file_object.read()
+            if isinstance(content, bytes):
+                content = content.decode('utf-8', errors='ignore')
+            return self._load_with_simple_loader_from_content(content, filename)
+
+    def _load_with_simple_loader_from_content(self, content: str, filename: str) -> List[Document]:
+        """Load documents from content string."""
+        from llama_index.core import Document
+        return [Document(text=content, metadata={"filename": filename})]
 
     def _load_with_llama_parse(self, file_path: Path) -> List[Document]:
         """Load documents using LlamaParse."""

@@ -46,7 +46,6 @@ def build_graph():
     graph_store = get_graph_store(config)
     llm, embed_model = setup_models(config)
 
-    # Load and process documents
     input_files = [
         file for file in Path(INPUT_DIR).iterdir()
         if file.is_file() and file.suffix.lower() in SUPPORTED_EXTENSIONS
@@ -68,7 +67,6 @@ def build_graph():
     sub_docs = processor.split_documents_into_pages(all_docs)
     print(f"Total pages after splitting: {len(sub_docs)}")
 
-    # Build and persist the index
     index = PropertyGraphIndex.from_documents(
         sub_docs,
         embed_model=embed_model,
@@ -84,7 +82,6 @@ def build_graph():
         show_progress=config.show_progress,
     )
 
-    # Persist the index
     if not os.path.exists(PERSIST_DIR):
         os.makedirs(PERSIST_DIR)
     index.storage_context.persist(persist_dir=PERSIST_DIR)
