@@ -10,6 +10,7 @@ import tempfile
 import os
 import asyncio
 import concurrent.futures
+from server.minio_client.client import MinioClient
 
 PERSIST_DIR = "./storage"
 async def ingest_file(file):
