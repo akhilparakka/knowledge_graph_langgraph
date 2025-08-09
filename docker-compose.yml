@@ -34,6 +34,20 @@ services:
       - internal
       - public
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # for messaging
+      - "15672:15672" # for management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
+    networks:
+      - internal
+      - public
+    restart: unless-stopped
+
 volumes:
   minio_new_volume:
 
