@@ -36,9 +36,9 @@ async def process_document(
     }
 
 async def push_document_to_minio(file: UploadFile):
-    URL = "localhost:9000"
-    USER = "guestuser"
-    PASS = "supersecret123"
+    URL = os.getenv("MINIO_URL", "s3:9000")
+    USER = os.getenv("MINIO_USER", "guestuser")
+    PASS = os.getenv("MINIO_PASSWORD", "supersecret123")
     BUCKET_NAME = "documents"
 
     minio_client = MinioClient(URL, USER, PASS)
@@ -51,7 +51,9 @@ async def push_document_to_minio(file: UploadFile):
     existing_objects = [obj.object_name for obj in minio_client.list_objects(BUCKET_NAME)]
     if object_name in existing_objects:
         print(f"Duplicate file found: {object_name}, skipping upload")
-        return f"http://{minio_client.endpoint}/{BUCKET_NAME}/{object_name}"
+        # Return URL accessible from outside Docker
+        external_url = os.getenv("MINIO_EXTERNAL_URL", "localhost:9000")
+        return f"http://{external_url}/{BUCKET_NAME}/{object_name}"
 
     suffix = os.path.splitext(file.filename or "")[1]
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
@@ -63,7 +65,9 @@ async def push_document_to_minio(file: UploadFile):
     finally:
         os.remove(tmp_path)
 
-    return f"http://{minio_client.endpoint}/{BUCKET_NAME}/{object_name}"
+    # Return URL accessible from outside Docker
+    external_url = os.getenv("MINIO_EXTERNAL_URL", "localhost:9000")
+    return f"http://{external_url}/{BUCKET_NAME}/{object_name}"
 
 def _normalize_filename(original_name: str, lowercase: bool = True) -> str:
     base, ext = os.path.splitext(original_name)

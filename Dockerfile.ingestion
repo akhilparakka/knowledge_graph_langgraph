@@ -1,0 +1,25 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Copy project files
+COPY pyproject.toml uv.lock ./
+
+# Install uv for faster dependency management
+RUN pip install uv
+
+# Install dependencies
+RUN uv sync --frozen
+
+# Copy application code
+COPY . .
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV RABBITMQ_HOST=rabbitmq
+ENV RABBITMQ_PORT=5672
+ENV RABBITMQ_USER=guest
+ENV RABBITMQ_PASSWORD=guest
+
+# Run the ingestion service with verbose output
+CMD ["uv", "run", "python", "-u", "server/services/injestion_service.py"]

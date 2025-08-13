@@ -1,22 +1,22 @@
 services:
-  neo4j:
-    image: neo4j:latest
-    container_name: neo4j-apoc
-    ports:
-      - "7474:7474"
-      - "7687:7687"
-    volumes:
-      - ./data:/data
-      - ./plugins:/plugins
-    environment:
-      - NEO4J_apoc_export_file_enabled=true
-      - NEO4J_apoc_import_file_enabled=true
-      - NEO4J_apoc_import_file_use__neo4j__config=true
-      - NEO4JLABS_PLUGINS=["apoc"]
-      - NEO4J_AUTH=neo4j/llamaindex
-    restart: unless-stopped
-    networks:
-      - internal
+  # neo4j:
+  #   image: neo4j:latest
+  #   container_name: neo4j-apoc
+  #   ports:
+  #     - "7474:7474"
+  #     - "7687:7687"
+  #   volumes:
+  #     - ./data:/data
+  #     - ./plugins:/plugins
+  #   environment:
+  #     - NEO4J_apoc_export_file_enabled=true
+  #     - NEO4J_apoc_import_file_enabled=true
+  #     - NEO4J_apoc_import_file_use__neo4j__config=true
+  #     - NEO4JLABS_PLUGINS=["apoc"]
+  #     - NEO4J_AUTH=neo4j/llamaindex
+  #   restart: unless-stopped
+  #   networks:
+  #     - internal
 
   s3:
     image: minio/minio:RELEASE.2023-11-01T18-37-25Z
@@ -46,6 +46,57 @@ services:
     networks:
       - internal
       - public
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: knowledge-graph-api
+    ports:
+      - "8000:8000"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+      - MINIO_URL=s3:9000
+      - MINIO_USER=guestuser
+      - MINIO_PASSWORD=supersecret123
+      - MINIO_EXTERNAL_URL=localhost:9000
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - internal
+      - public
+    restart: unless-stopped
+
+  ingestion:
+    build:
+      context: .
+      dockerfile: Dockerfile.ingestion
+    container_name: knowledge-graph-ingestion
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+      - MINIO_URL=s3:9000
+      - MINIO_USER=guestuser
+      - MINIO_PASSWORD=supersecret123
+      - MINIO_EXTERNAL_URL=localhost:9000
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - internal
     restart: unless-stopped
 
 volumes:
